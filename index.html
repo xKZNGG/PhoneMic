@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>PhoneMic Web</title>
+  <style>
+    body {
+      background: #111;
+      color: #fff;
+      font-family: sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    input, button {
+      font-size: 16px;
+      padding: 10px;
+      margin: 10px;
+      width: 90%;
+      max-width: 400px;
+      border-radius: 6px;
+      border: none;
+    }
+    button {
+      cursor: pointer;
+      background: #2196f3;
+      color: white;
+    }
+    #status {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎤 PhoneMic Web</h1>
+  <input id="url" value="wss://phonemic.onrender.com/mic" />
+  <br />
+  <button onclick="connect()">🔗 Conectar</button>
+  <button onclick="startMic()">🎙️ Iniciar Microfone</button>
+  <div id="status">Status: Aguardando...</div>
+
+  <script>
+    let ws, recorder;
+    function connect() {
+      const url = document.getElementById("url").value;
+      ws = new WebSocket(url);
+      ws.onopen = () => setStatus("✅ Conectado");
+      ws.onclose = () => setStatus("❌ Desconectado");
+      ws.onerror = () => setStatus("⚠️ Erro na conexão");
+    }
+
+    function startMic() {
+      navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+        recorder = new MediaRecorder(stream);
+        recorder.ondataavailable = e => {
+          if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(e.data);
+          }
+        };
+        recorder.start(250);
+        setStatus("🎙️ Microfone ativo");
+      }).catch(err => {
+        setStatus("🚫 Acesso negado ao microfone");
+        console.error(err);
+      });
+    }
+
+    function setStatus(msg) {
+      document.getElementById("status").innerText = "Status: " + msg;
+    }
+  </script>
+</body>
+</html>
