@@ -1,39 +1,42 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <title>PhoneMic</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <title>PhoneMic IP</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       font-family: sans-serif;
-      text-align: center;
       background: #111;
       color: #fff;
+      text-align: center;
       padding: 40px;
     }
-    button {
+    input, button {
       font-size: 1.2em;
-      padding: 10px 20px;
+      padding: 10px;
       margin: 10px;
+      border-radius: 8px;
       border: none;
-      border-radius: 10px;
-      cursor: pointer;
+    }
+    button {
       background: #1e90ff;
       color: white;
-    }
-    #status {
-      margin-top: 20px;
-      font-weight: bold;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <h1>🎤 PhoneMic</h1>
-  <p>Status: <span id="status">Desconectado</span></p>
-  <button onclick="connect()">🔗 Conectar</button>
-  <button onclick="startMic()">🎙️ Iniciar Microfone</button>
-  <button onclick="toggleMute()" id="muteBtn" disabled>🔇 Mutar</button>
+  <h1>🎤 PhoneMic IP</h1>
+  <p>Digite o IP (ex: ws://100.x.x.x:8080)</p>
+  <input id="wsUrl" value="ws://100.64.0.1:8080" size="40" />
+  <div>
+    <button onclick="connect()">🔗 Conectar</button>
+    <button onclick="startMic()">🎙️ Iniciar Microfone</button>
+    <button onclick="toggleMute()" id="muteBtn" disabled>🔇 Mutar</button>
+  </div>
+  <p id="status">Status: Desconectado</p>
 
   <script>
     let ws;
@@ -41,7 +44,8 @@
     let isMuted = false;
 
     function connect() {
-      ws = new WebSocket("wss://phonemic.onrender.com/mic");
+      const url = document.getElementById("wsUrl").value;
+      ws = new WebSocket(url);
       ws.onopen = () => setStatus("Conectado ✅");
       ws.onclose = () => setStatus("Desconectado ❌");
       ws.onerror = () => setStatus("Erro ⚠️");
@@ -56,7 +60,7 @@
             ws.send(e.data);
           }
         };
-        recorder.start(250); // envia em blocos a cada 250ms
+        recorder.start(250);
         document.getElementById("muteBtn").disabled = false;
         setStatus("Microfone ativo 🎙️");
       } catch (err) {
